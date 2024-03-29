@@ -26,6 +26,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/');
+};
 
 myDB(async client => {
   const myDataBase = await client.db('fcc-mongodb-and-mongoose').collection('people');
@@ -40,12 +46,12 @@ myDB(async client => {
     });
   });
   app.route('/login').post(passport.authenticate('local',{ failureRedirect: '/' } ), (req, res) => {
-    
+    // Change the response to render the Pug template
     res.redirect("/profile");
   });
 
-  app.route("/profile").get((req,res)=>{
-    res.render("profile");
+  app.route("/profile").get(ensureAuthenticated, (req,res)=>{
+    res.render("profile",{username:req.user.username});
   })
   passport.serializeUser((user, done) => {
     done(null, user._id);
