@@ -5,7 +5,7 @@ const myDB = require('./connection');
 const fccTesting = require('./freeCodeCamp/fcctesting.js');
 const session = require('express-session');
 const passport = require('passport');
-const {ObjectID} = require('mongodb');
+const { ObjectID } = require('mongodb');
 
 const app = express();
 
@@ -24,27 +24,35 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser((user, done) => {
-  done(null, user._id);
-});
+
+
 myDB(async client => {
-  
-  const databasesList = await client.db().admin().listDatabases();
-
-  console.log("Databases:");
-  databasesList.databases.forEach(db => console.log(` - ${db.name}`));
-
   const myDataBase = await client.db('fcc-mongodb-and-mongoose').collection('people');
 
-  passport.deserializeUser((id, done) => {
-  myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => {
-    done(null, null);
+  // Be sure to change the title
+  app.route('/').get((req, res) => {
+    // Change the response to render the Pug template
+    res.render('index', {
+      title: 'Connected to Database',
+      message: 'Please login'
+    });
   });
-});
-});
 
-app.route('/').get((req, res) => {
-  res.render('index', { title: 'Hello', message: 'Please log in' });
+  passport.serializeUser((user, done) => {
+    done(null, user._id);
+  });
+  passport.deserializeUser((id, done) => {
+    myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => {
+      done(null, doc);
+    });
+
+  });
+
+  // Be sure to add this...
+}).catch(e => {
+  app.route('/').get((req, res) => {
+    res.render('index', { title: e, message: 'Unable to connect to database' });
+  });
 });
 
 const PORT = process.env.PORT || 3000;
