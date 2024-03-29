@@ -45,6 +45,7 @@ myDB(async client => {
       showLogin: true
     });
   });
+
   app.route('/login').post(passport.authenticate('local',{ failureRedirect: '/' } ), (req, res) => {
     // Change the response to render the Pug template
     res.redirect("/profile");
@@ -52,10 +53,25 @@ myDB(async client => {
 
   app.route("/profile").get(ensureAuthenticated, (req,res)=>{
     res.render("profile",{username:req.user.username});
-  })
+  });
+
+
   passport.serializeUser((user, done) => {
     done(null, user._id);
   });
+
+  app.route('/logout')
+  .get((req, res) => {
+    req.logout();
+    res.redirect('/');
+  });
+
+  app.use((req, res, next) => {
+    res.status(404)
+      .type('text')
+      .send('Not Found');
+  });
+  
   passport.deserializeUser((id, done) => {
     myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => {
       done(null, doc);
