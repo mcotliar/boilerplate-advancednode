@@ -8,8 +8,13 @@ $(document).ready(function () {
   });
   /*global io*/
   let socket = io();
-  socket.on('user count', function(data) {
-    console.log(data);
+  socket.on('user', function(data) {
+    const {currentUsers, username,connected} = data;
+    $('#num-users').text(currentUsers + ' users online');
+    let message =
+      username +
+      (connected ? ' has joined the chat.' : ' has left the chat.');
+    $('#messages').append($('<li>').html('<b>' + message + '</b>'));
   });
   
 });

@@ -25,7 +25,8 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: true,
   saveUninitialized: true,
-  cookie: { secure: false, key: 'express.sid' },
+  cookie: { secure: false },
+  key: 'express.sid',
   store
 }));
 
@@ -49,11 +50,12 @@ myDB(async client => {
   auth(app, myDataBase);
   routes(app, myDataBase);
   io.on('connection', socket => {
-    console.log('user ' + socket.request.user.username + ' connected');
+    const {user} = socket.request;
+    console.log('user ' + user.username + ' connected');
     ++currentUsers;
-    io.emit('user count', currentUsers);
+    io.emit('user', {currentUsers, username:user.username,connected:true});
     socket.on('disconnect', () => {
-      io.emit('user count', --currentUsers);
+      io.emit('user', {currentUsers, username:user.username,connected:false});
     });
   });
 
