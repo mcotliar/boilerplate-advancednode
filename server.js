@@ -50,12 +50,16 @@ myDB(async client => {
   auth(app, myDataBase);
   routes(app, myDataBase);
   io.on('connection', socket => {
-    const {user} = socket.request;
-    console.log('user ' + user.username + ' connected');
+    const {user:{username}} = socket.request;
+    console.log('user ' + username + ' connected');
     ++currentUsers;
-    io.emit('user', {currentUsers, username:user.username,connected:true});
+    io.emit('user', {currentUsers, username:username,connected:true});
     socket.on('disconnect', () => {
-      io.emit('user', {currentUsers, username:user.username,connected:false});
+      io.emit('user', {currentUsers, username:username,connected:false});
+    });
+    socket.on('chat message',(message)=>{
+      console.log('chat message',message);
+      io.emit('chat message',{username:username,message});
     });
   });
 
