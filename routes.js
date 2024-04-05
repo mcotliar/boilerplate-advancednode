@@ -14,9 +14,24 @@ module.exports = function (app, myDataBase) {
             title: 'Connected to Database',
             message: 'Please login',
             showLogin: true,
-            showRegistration: true
+            showRegistration: true,
+            showSocialAuth: true
         });
     });
+
+    // app.route('/auth/github').get((req,res,next)=>{
+    //     console.log('authenticating with github!');
+    //    passport.authenticate('github',function(err, user, info, status) {
+    //     if (err) { 
+    //         console.log({err});
+    //         return next(err) }
+    //    });        
+    // });
+
+    // app.route('/auth/github/callback')
+    // .get(passport.authenticate('github', { failureRedirect: '/' }), (req,res) => {
+    //   res.redirect('/profile');
+    // });
 
     app.route('/register')
         .post((req, res, next) => {
@@ -65,7 +80,10 @@ module.exports = function (app, myDataBase) {
             res.redirect('/');
         });
 
-
+    app.route('/auth/github').get(passport.authenticate('github'));
+    app.route('/auth/github/callback').get(passport.authenticate('github', { failureRedirect: '/' }), (req, res) => {
+        res.redirect('/profile');
+    })
 
     app.use((req, res, next) => {
         res.status(404)
