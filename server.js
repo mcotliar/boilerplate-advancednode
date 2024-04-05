@@ -24,6 +24,7 @@ app.use(session({
 
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
+let currentUsers = 0;
 
 myDB(async client => {
   const myDataBase = await client.db('fcc-mongodb-and-mongoose').collection('people');
@@ -31,7 +32,11 @@ myDB(async client => {
   routes(app, myDataBase);
   io.on('connection', socket => {
     console.log('A user has connected');
+    ++currentUsers;
+    io.emit('user count', currentUsers);
   });
+
+  
 }).catch(e => {
   app.route('/').get((req, res) => {
     res.render('index', { title: e, message: 'Unable to connect to database' });
